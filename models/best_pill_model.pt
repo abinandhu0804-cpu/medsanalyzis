@@ -1,10 +1,10 @@
-from ultralytics import YOLO
+import torch
+import urllib.request
 
-@st.cache_resource
-def load_model():
-    # Make sure the path is correct
-    model_path = "models/best_pill_model.pt"
-    model = YOLO(model_path)
-    return model
+MODEL_URL = "https://huggingface.co/username/best_pill_model/resolve/main/best_pill_model.pt"
+MODEL_PATH = "best_pill_model.pt"
 
-model = load_model()
+if not os.path.exists(MODEL_PATH):
+    urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+
+model = YOLO(MODEL_PATH)

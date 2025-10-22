@@ -1,55 +1,61 @@
 import streamlit as st
 from ultralytics import YOLO
+import numpy as np
 from PIL import Image
 import io
 import qrcode
 
-st.set_page_config(page_title="Meds Analyzer", layout="centered")
+# ---------- PAGE SETUP ----------
+st.set_page_config(
+    page_title="Meds Analyzer",
+    page_icon="💊",
+    layout="centered"
+)
 
-st.title("Meds Analyzer")
-st.write("Scan the QR code below to open this page on another device and upload your medicine photo.")
+st.title("💊 Meds Analyzer")
+st.write("Scan the QR code below on your phone to open this app and upload a photo of your medicine.")
 
-# --- Generate QR code for current URL ---
-url = st.secrets.get("APP_URL", "https://medsanalyz.streamlit.app")  # Optional: set your app URL in Streamlit secrets
+# ---------- GENERATE QR CODE ----------
+# Replace this URL with your live Streamlit app URL
+app_url = "https://medsanalyz.streamlit.app/"
+
 qr = qrcode.QRCode(box_size=6, border=2)
-qr.add_data(url)
+qr.add_data(app_url)
 qr.make(fit=True)
 img_qr = qr.make_image(fill_color="black", back_color="white")
-st.image(img_qr, caption="Scan this QR code", use_container_width=True)
+st.image(img_qr, caption="Scan to open on your phone", use_container_width=True)
 
-# --- Cache the YOLO model ---
-@st.cache_resource
+st.markdown("---")
+
+# ---------- FILE UPLOAD ----------
+uploaded_file = st.file_uploader("Take a photo of your medicine", type=["png", "jpg", "jpeg"], accept_multiple_files=False)
+
+# ---------- LOAD MODEL ----------
+@st.cache_resource  # Caches the model to avoid reloading
 def load_model():
-    model = YOLO("models/best_pill_model.pt")  # Use cleaned, compatible YOLO model
+    model = YOLO("models/best_pill_model.pt")  # Make sure this path exists
     return model
 
-model = load_model()
-
-st.write("---")
-st.subheader("Upload your medicine photo:")
-
-uploaded_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
-
 if uploaded_file:
-    image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded image", use_container_width=True)
+    model = load_model()
 
-    # Convert to bytes for YOLO
-    img_bytes = io.BytesIO()
-    image.save(img_bytes, format="PNG")
-    img_bytes = img_bytes.getvalue()
+    # Read image
+    img_bytes = uploaded_file.read()
+    image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+    
+    st.image(image, caption="Uploaded Image", use_container_width=True)
+    
+    # ---------- PREDICTION ----------
+    with st.spinner("Analyzing pill..."):
+        results = model.predict(image)  # YOLO returns a Results object
 
-    # Run prediction
-    try:
-        results = model.predict(img_bytes)
-        # Show results image
-        result_img = results[0].plot()
-        st.image(result_img, caption="Pill Detection Result", use_container_width=True)
-
-        # Display detected pills info
-        if results[0].boxes:
-            st.success(f"Detected {len(results[0].boxes)} pill(s) in the image.")
+    # ---------- DISPLAY RESULTS ----------
+    for result in results:
+        boxes = result.boxes
+        if boxes is not None and len(boxes) > 0:
+            st.success(f"Pill detected! Number of pills: {len(boxes)}")
+            # Draw boxes on image
+            annotated_image = result.plot()
+            st.image(annotated_image, caption="Detection Result", use_container_width=True)
         else:
-            st.warning("No pills detected. Make sure the image is clear and taken from above.")
-    except Exception as e:
-        st.error(f"Prediction failed: {e}")
+            st.warning("No pill detected! Have you taken your dose?")

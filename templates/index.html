@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meds Analyzer</title>
+    <style>
+        body { font-family: Arial; text-align: center; background: #f7f7f7; margin:0; padding:0; }
+        .container { margin-top: 100px; }
+        h1 { color: #2c3e50; }
+        .qr-code img { margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Meds Analyzer</h1>
+        <p>Scan the QR code below to upload your photo:</p>
+        <div class="qr-code">
+            <img src="{{ qr_code }}" alt="QR Code">
+        </div>
+    </div>
+</body>
+</html>

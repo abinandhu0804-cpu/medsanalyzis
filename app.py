@@ -3,7 +3,7 @@ from PIL import Image
 from ultralytics import YOLO
 
 # Load your trained pill detection model
-model = YOLO("models/best_pill_model.pt")
+model = model = YOLO("yolov8n.pt")
 
 st.title("Meds Analyzer")
 st.write("Upload your medicine photo to check doses.")

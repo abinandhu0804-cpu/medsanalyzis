@@ -16,14 +16,22 @@ st.title("💊 Meds Analyzer")
 st.write("Scan the QR code below on your phone to open this app and upload a photo of your medicine.")
 
 # ---------- GENERATE QR CODE ----------
+import io
+
+# ---------- GENERATE QR CODE ----------
 app_url = "https://medsanalyz.streamlit.app/"  # Replace with your deployed URL
 qr = qrcode.QRCode(box_size=6, border=2)
 qr.add_data(app_url)
 qr.make(fit=True)
 img_qr = qr.make_image(fill_color="black", back_color="white")
-st.image(img_qr, caption="Scan to open on your phone", use_container_width=True)
 
-st.markdown("---")
+# Convert PIL QR image to bytes
+buf = io.BytesIO()
+img_qr.save(buf, format="PNG")
+buf.seek(0)
+
+st.image(buf, caption="Scan to open on your phone", use_container_width=True)
+
 
 # ---------- FILE UPLOAD ----------
 uploaded_file = st.file_uploader(

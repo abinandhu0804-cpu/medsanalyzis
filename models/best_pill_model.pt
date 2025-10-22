@@ -1,9 +1,4 @@
 from ultralytics import YOLO
-import streamlit as st
 
-st.title("Meds Analyzer")
-
-# Use a pre-trained small YOLO model for demo
-model = YOLO("yolov8n.pt")  # downloads automatically
-
-st.write("Using YOLOv8 nano model for demo purposes.")
+# Pre-trained small YOLO model (downloads automatically)
+model = YOLO("yolov8n.pt")

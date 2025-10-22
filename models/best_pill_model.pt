@@ -1,5 +1,10 @@
 from ultralytics import YOLO
-model = YOLO("your_original_model.pt")
 
-# Export to a smaller, CPU-friendly version
-model.export(format="pt")  # This will produce a smaller .pt compatible with Streamlit
+@st.cache_resource
+def load_model():
+    # Make sure the path is correct
+    model_path = "models/best_pill_model.pt"
+    model = YOLO(model_path)
+    return model
+
+model = load_model()
